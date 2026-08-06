@@ -42,7 +42,7 @@ export class Logger {
     ];
   }
 
-  public push(type: LogType, data: Record<string, unknown>) {
+  private push(type: LogType, data: Record<string, unknown>) {
     for (const [k, v] of Object.entries(data)) {
       this.context.push({
         key: `[${type.toUpperCase().padEnd(5)}] ${k}`,
@@ -50,6 +50,27 @@ export class Logger {
         time: new Date().getTime(),
       });
     }
+  }
+
+  public data(data: Record<string, unknown>) {
+    this.push("data", data);
+  }
+
+  public error(data: Record<string, unknown>) {
+    this.push("error", data);
+  }
+
+  public warn(data: Record<string, unknown>) {
+    this.push("warn", data);
+  }
+  public info(data: Record<string, unknown>) {
+    this.push("info", data);
+  }
+  public debug(data: Record<string, unknown>) {
+    this.push("debug", data);
+  }
+  public trace(data: Record<string, unknown>) {
+    this.push("trace", data);
   }
 
   public print() {
