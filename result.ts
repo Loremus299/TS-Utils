@@ -77,5 +77,18 @@ export async function fallbackAsync<T, E, V>(
 
     lastError = res.error;
   }
-  return makeError<T, E>(lastError);
+  return makeError(lastError);
+}
+
+export async function tryCatch<T, V, E>(
+  data: V,
+  fun: (data: V) => Promise<T>,
+  fallbackError: (error: unknown) => E,
+): Promise<Result<T, E>> {
+  try {
+    const res = await fun(data);
+    return makeData(res);
+  } catch (error) {
+    return makeError(fallbackError(error));
+  }
 }
