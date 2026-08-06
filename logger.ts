@@ -53,17 +53,26 @@ export class Logger {
 
   public print() {
     let lastTime = this.context[0].time;
+    const time = new Date(this.context[0].time);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const formattedTime =
+      `${time.getFullYear()}-${pad(time.getMonth() + 1)}-${pad(time.getDate())}` +
+      ` ${pad(time.getHours())}:${pad(time.getMinutes())}:${pad(time.getSeconds())}` +
+      `.${pad(time.getMilliseconds())}`;
+
     console.log(
-      `${C.gray}${this.context[0].time} ID - ${this.context[0].value} ${"-".repeat(70)}${C.reset}`,
+      `${C.gray}┌─ ${this.context[0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
     );
 
     for (const logItem of this.context.slice(1)) {
-      const delta = String(logItem.time - lastTime + " ms").padEnd(8);
+      const delta = ("⏱ " + String(logItem.time - lastTime)).padEnd(8);
       const paddedKey = logItem.key.padEnd(30);
       const color = colorForKey(logItem.key);
+      const symbol =
+        this.context.indexOf(logItem) === this.context.length - 1 ? "└─" : "├─";
 
       console.log(
-        `${color}  |--> ${delta} ${paddedKey} | ${logItem.value}${C.reset}`,
+        `${color}${symbol} ${delta} ${paddedKey} │ ${logItem.value}${C.reset}`,
       );
 
       lastTime = logItem.time;
