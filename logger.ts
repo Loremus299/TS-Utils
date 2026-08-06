@@ -5,6 +5,7 @@ const C = {
   green: "\x1b[32m",
   yellow: "\x1b[33m",
   red: "\x1b[31m",
+  blue: "\x1b[34m",
   magenta: "\x1b[35m",
 };
 
@@ -61,7 +62,7 @@ export class Logger {
       `.${pad(time.getMilliseconds())}`;
 
     console.log(
-      `${C.gray}┌─ ${this.context[0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
+      `${C.blue}┌─ ${this.context[0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
     );
 
     for (const logItem of this.context.slice(1)) {
