@@ -54,19 +54,39 @@ export class Logger {
   public print() {
     let lastTime = this.context[0].time;
     console.log(
-      `${C.gray}${this.context[0].time} ID - ${this.context[0].value} ${"-".repeat(77)}${C.reset}`,
+      `${C.gray}${this.context[0].time} ID - ${this.context[0].value} ${"-".repeat(70)}${C.reset}`,
     );
 
     for (const logItem of this.context.slice(1)) {
       const delta = String(logItem.time - lastTime + " ms").padEnd(8);
-      const paddedKey = logItem.key.padEnd(20);
+      const paddedKey = logItem.key.padEnd(30);
       const color = colorForKey(logItem.key);
 
       console.log(
-        `${color}---> ${delta} ${paddedKey} | ${logItem.value}${C.reset}`,
+        `${color}  |--> ${delta} ${paddedKey} | ${logItem.value}${C.reset}`,
       );
 
       lastTime = logItem.time;
     }
   }
 }
+
+async function add({ a, b, log }: { a: number; b: number; log: Logger }) {
+  log.push("info", { layer: "inner function" });
+  log.push("trace", { a, b });
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+  const c = a + b;
+  log.push("trace", { c });
+  log.push("info", { layer: "inner function ended" });
+  return c;
+}
+
+async function outer() {
+  const log = new Logger();
+  log.push("info", { layer: "outer function" });
+  const habitDescriptionId = await add({ a: 3, b: 5, log });
+  log.push("trace", { habitDescriptionId });
+  log.print();
+}
+
+await outer();
