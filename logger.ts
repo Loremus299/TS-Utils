@@ -76,7 +76,7 @@ export class Logger {
     this.push("trace", data);
   }
 
-  public print() {
+  private print() {
     let lastTime = this.context[0].time;
     const time = new Date(this.context[0].time);
     const pad = (n: number) => String(n).padStart(2, "0");
@@ -101,6 +101,30 @@ export class Logger {
       );
 
       lastTime = logItem.time;
+    }
+  }
+
+  public async withLogger<T, Ctx extends Record<string, unknown>>(
+    ctx: Ctx,
+    fun: (arg: { log: Logger } & Ctx) => Promise<T>,
+  ) {
+    const log = new Logger();
+    try {
+      return await fun({ log, ...ctx });
+    } finally {
+      log.print();
+    }
+  }
+
+  public withLoggerSync<T, Ctx extends Record<string, unknown>>(
+    ctx: Ctx,
+    fun: (arg: { log: Logger } & Ctx) => Promise<T>,
+  ) {
+    const log = new Logger();
+    try {
+      return fun({ log, ...ctx });
+    } finally {
+      log.print();
     }
   }
 }
