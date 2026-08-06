@@ -1,5 +1,3 @@
-import { makeError } from "./result";
-
 const C = {
   reset: "\x1b[0m",
   gray: "\x1b[90m",
