@@ -104,27 +104,16 @@ export class Logger {
     }
   }
 
-  public async withLogger<T, Ctx extends Record<string, unknown>>(
-    ctx: Ctx,
-    fun: (arg: { log: Logger } & Ctx) => Promise<T>,
+  public static withLogger<T, V extends Record<string, unknown>>(
+    fun: (arg: { log: Logger } & V) => T,
   ) {
-    const log = new Logger();
-    try {
-      return await fun({ log, ...ctx });
-    } finally {
-      log.print();
-    }
-  }
-
-  public withLoggerSync<T, Ctx extends Record<string, unknown>>(
-    ctx: Ctx,
-    fun: (arg: { log: Logger } & Ctx) => Promise<T>,
-  ) {
-    const log = new Logger();
-    try {
-      return fun({ log, ...ctx });
-    } finally {
-      log.print();
-    }
+    return (args: V) => {
+      const log = new Logger();
+      try {
+        return fun({ log, ...args });
+      } finally {
+        log.print();
+      }
+    };
   }
 }
