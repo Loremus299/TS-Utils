@@ -26,14 +26,18 @@ interface LogEntry {
 
 type LogType = "data" | "error" | "warn" | "info" | "debug" | "trace";
 
-export type LogContext = Array<LogEntry>;
+type LogContext = Array<LogEntry>;
 
 export class Logger {
   private readonly context: LogContext;
 
   public constructor() {
     this.context = [
-      { key: "RequestId", value: "1234", time: new Date().getTime() },
+      {
+        key: "RequestId",
+        value: globalThis.crypto.randomUUID(),
+        time: new Date().getTime(),
+      },
     ];
   }
 
@@ -48,14 +52,21 @@ export class Logger {
   }
 
   public print() {
+    let lastTime = this.context[0].time;
     console.log(
       `${C.gray}${this.context[0].time} ID - ${this.context[0].value} ${"-".repeat(77)}${C.reset}`,
     );
 
     for (const logItem of this.context.slice(1)) {
+      const delta = String(logItem.time - lastTime + " ms").padEnd(8);
+      const paddedKey = logItem.key.padEnd(20);
+      const color = colorForKey(logItem.key);
+
       console.log(
-        `${colorForKey(logItem.key)}---> ${logItem.time} ${logItem.key} - ${logItem.value}${C.reset}`,
+        `${color}---> ${delta} ${paddedKey} | ${logItem.value}${C.reset}`,
       );
+
+      lastTime = logItem.time;
     }
   }
 }
