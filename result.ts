@@ -39,3 +39,25 @@ export async function ifOkAsync<T, E, R>(
     return error(output.error);
   }
 }
+
+export function ifError<T, E, F>(
+  output: Result<T, E>,
+  fun: (arg: E) => F,
+): Result<T, F> {
+  if (!output.success) {
+    return error(fun(output.error));
+  } else {
+    return ok(output.data);
+  }
+}
+
+export async function ifErrorAsync<T, E, F>(
+  output: Result<T, E>,
+  fun: (arg: E) => Promise<F>,
+): Promise<Result<T, F>> {
+  if (!output.success) {
+    return error(await fun(output.error));
+  } else {
+    return ok(output.data);
+  }
+}
