@@ -11,9 +11,9 @@ const C = {
 
 function colorForKey(key: string) {
   if (key.startsWith("[DATA ]")) return C.cyan;
-  if (key.startsWith("[INFO ]")) return C.green;
-  if (key.startsWith("[WARN ]")) return C.yellow;
   if (key.startsWith("[ERROR]")) return C.red;
+  if (key.startsWith("[WARN ]")) return C.yellow;
+  if (key.startsWith("[INFO ]")) return C.green;
   if (key.startsWith("[DEBUG]")) return C.magenta;
   if (key.startsWith("[TRACE]")) return C.gray;
   return C.reset;
