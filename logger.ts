@@ -80,23 +80,3 @@ export class Logger {
     }
   }
 }
-
-async function add({ a, b, log }: { a: number; b: number; log: Logger }) {
-  log.push("info", { layer: "inner function" });
-  log.push("trace", { a, b });
-  await new Promise((resolve) => setTimeout(resolve, 5000));
-  const c = a + b;
-  log.push("trace", { c });
-  log.push("info", { layer: "inner function ended" });
-  return c;
-}
-
-async function outer() {
-  const log = new Logger();
-  log.push("info", { layer: "outer function" });
-  const habitDescriptionId = await add({ a: 3, b: 5, log });
-  log.push("trace", { habitDescriptionId });
-  log.print();
-}
-
-await outer();
