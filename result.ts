@@ -82,8 +82,8 @@ export async function fallbackAsync<T, E, V>(
 
 export async function tryCatch<T, V, E>(
   data: V,
-  fun: (data: V) => Promise<T>,
   fallbackError: (error: unknown) => E,
+  fun: (data: V) => Promise<T>,
 ): Promise<Result<T, E>> {
   try {
     const res = await fun(data);
