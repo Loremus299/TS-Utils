@@ -1,3 +1,5 @@
+import { makeError } from "./result";
+
 const C = {
   reset: "\x1b[0m",
   gray: "\x1b[90m",
@@ -86,7 +88,7 @@ export class Logger {
       `.${pad(time.getMilliseconds())}`;
 
     console.log(
-      `${C.blue}┌─ ${this.context[0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
+      `\n${C.blue}┌─ ${this.context[0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
     );
 
     for (const logItem of this.context.slice(1)) {
