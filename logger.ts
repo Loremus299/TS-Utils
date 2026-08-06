@@ -63,12 +63,15 @@ export class Logger {
   public warn(data: Record<string, unknown>) {
     this.push("warn", data);
   }
+
   public info(data: Record<string, unknown>) {
     this.push("info", data);
   }
+
   public debug(data: Record<string, unknown>) {
     this.push("debug", data);
   }
+
   public trace(data: Record<string, unknown>) {
     this.push("trace", data);
   }
