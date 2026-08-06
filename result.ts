@@ -45,3 +45,37 @@ export async function mapErrorAsync<T, E, F>(
     ? makeData(output.data)
     : makeError(await fun(output.error));
 }
+
+export function fallback<T, E, V>(
+  data: V,
+  defaultError: E,
+  funs: Array<(arg: V) => Result<T, E>>,
+): Result<T, E> {
+  let lastError = defaultError;
+  for (const fun of funs) {
+    const res = fun(data);
+    if (res.success) {
+      return res;
+    }
+
+    lastError = res.error;
+  }
+  return makeError<T, E>(lastError);
+}
+
+export async function fallbackAsync<T, E, V>(
+  data: V,
+  defaultError: E,
+  funs: Array<(arg: V) => Promise<Result<T, E>>>,
+): Promise<Result<T, E>> {
+  let lastError = defaultError;
+  for (const fun of funs) {
+    const res = await fun(data);
+    if (res.success) {
+      return res;
+    }
+
+    lastError = res.error;
+  }
+  return makeError<T, E>(lastError);
+}
