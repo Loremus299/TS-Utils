@@ -85,16 +85,17 @@ export class Logger {
       ` ${pad(time.getHours())}:${pad(time.getMinutes())}:${pad(time.getSeconds())}` +
       `.${pad(time.getMilliseconds())}`;
 
+    const lastLogItem = this.context[this.context.length - 1];
+
     console.log(
-      `\n${C.blue}┌─ ${this.context[0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
+      `${C.blue}┌─ ${this.context[0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
     );
 
     for (const logItem of this.context.slice(1)) {
       const delta = ("⏱ " + String(logItem.time - lastTime)).padEnd(8);
       const paddedKey = logItem.key.padEnd(30);
       const color = colorForKey(logItem.key);
-      const symbol =
-        this.context.indexOf(logItem) === this.context.length - 1 ? "└─" : "├─";
+      const symbol = logItem === lastLogItem ? "└─" : "├─";
 
       console.log(
         `${color}${symbol} ${delta} ${paddedKey} │ ${logItem.value}${C.reset}`,
@@ -105,6 +106,19 @@ export class Logger {
   }
 
   public static withLogger<T, V extends Record<string, unknown>>(
+    fun: (arg: { log: Logger } & V) => T,
+  ) {
+    return async (args: V) => {
+      const log = new Logger();
+      try {
+        return await fun({ log, ...args });
+      } finally {
+        log.print();
+      }
+    };
+  }
+
+  public static withLoggerSync<T, V extends Record<string, unknown>>(
     fun: (arg: { log: Logger } & V) => T,
   ) {
     return (args: V) => {
