@@ -105,26 +105,24 @@ export class Logger {
     }
   }
 
-  public static withLogger<T, V extends Record<string, unknown>>(
-    fun: (arg: { log: Logger } & V) => T,
-  ) {
-    return async (args: V) => {
+  public static withLogger<T, V extends { log: Logger }>(fun: (arg: V) => T) {
+    return async (args: Omit<V, "log">) => {
       const log = new Logger();
       try {
-        return await fun({ log, ...args });
+        return await fun({ log, ...args } as V);
       } finally {
         log.print();
       }
     };
   }
 
-  public static withLoggerSync<T, V extends Record<string, unknown>>(
-    fun: (arg: { log: Logger } & V) => T,
+  public static withLoggerSync<T, V extends { log: Logger }>(
+    fun: (arg: V) => T,
   ) {
-    return (args: V) => {
+    return (args: Omit<V, "log">) => {
       const log = new Logger();
       try {
-        return fun({ log, ...args });
+        return fun({ log, ...args } as V);
       } finally {
         log.print();
       }
