@@ -103,9 +103,13 @@ export class Logger {
 
       lastTime = logItem.time;
     }
+
+    console.log("\n");
   }
 
-  public static withLogger<T, V extends { log: Logger }>(fun: (arg: V) => T) {
+  public static withLogger<T, V extends { log: Logger }>(
+    fun: (arg: V) => Promise<T>,
+  ) {
     return async (args: Omit<V, "log">) => {
       const log = new Logger();
       try {
