@@ -52,6 +52,10 @@ export class Result<T, E> {
     return this.value.success ? this.value.data : fun(this.value.error);
   }
 
+  public match<R>(onOk: (t: T) => R, onErr: (e: E) => R): R {
+    return this.value.success ? onOk(this.value.data) : onErr(this.value.error);
+  }
+
   public async mapOk<R>(fun: (arg: T) => Promise<R>): Promise<Result<R, E>> {
     return this.value.success
       ? Result.ok<R, E>(await fun(this.value.data))
