@@ -80,16 +80,14 @@ export async function fallbackAsync<T, E, V>(
   return makeError(lastError);
 }
 
-export async function tryCatch<T, V, E>(
+export async function tryCatch<T, V>(
   data: V,
   fun: (data: V) => Promise<T>,
-  customError: E,
-): Promise<Result<T, E>> {
+): Promise<Result<T, string>> {
   try {
     const res = await fun(data);
     return makeData(res);
   } catch (error) {
-    console.error(error); //replace according to logger in project
-    return makeError(customError);
+    return makeError(error as string);
   }
 }
