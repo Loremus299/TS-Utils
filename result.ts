@@ -48,10 +48,6 @@ export class Result<T, E> {
     }
   }
 
-  public unwrap(fun: (arg: E) => never): T {
-    return this.value.success ? this.value.data : fun(this.value.error);
-  }
-
   public match<R>(onOk: (t: T) => R, onErr: (e: E) => R): R {
     return this.value.success ? onOk(this.value.data) : onErr(this.value.error);
   }
