@@ -3,7 +3,7 @@ export type ResultType<T, E> =
   | { success: false; error: E };
 
 export class Result<T, E> {
-  private readonly value: ResultType<T, E>;
+  public readonly value: ResultType<T, E>;
 
   private constructor(value: ResultType<T, E>) {
     this.value = value;
