@@ -39,12 +39,12 @@ export class Result<T, E> {
   public static async tryCatch<T, V>(
     data: V,
     fun: (data: V) => Promise<T>,
-  ): Promise<Result<T, string>> {
+  ): Promise<Result<T, unknown>> {
     try {
       const res = await fun(data);
       return Result.ok(res);
     } catch (error) {
-      return Result.error(error as string);
+      return Result.error(error);
     }
   }
 
