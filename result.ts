@@ -52,15 +52,19 @@ export class Result<T, E> {
     return this.value.success ? onOk(this.value.data) : onErr(this.value.error);
   }
 
-  public async mapOk<R>(fun: (arg: T) => Promise<R>): Promise<Result<R, E>> {
+  public mapOk<R>(fun: (arg: T) => R): Result<R, E> {
     return this.value.success
-      ? Result.ok<R, E>(await fun(this.value.data))
+      ? Result.ok<R, E>(fun(this.value.data))
       : Result.error<R, E>(this.value.error);
   }
 
-  public async mapError<F>(fun: (arg: E) => Promise<F>): Promise<Result<T, F>> {
+  public mapError<F>(fun: (arg: E) => F): Result<T, F> {
     return this.value.success
       ? Result.ok<T, F>(this.value.data)
-      : Result.error<T, F>(await fun(this.value.error));
+      : Result.error<T, F>(fun(this.value.error));
+  }
+
+  public type() {
+    return this.value as ResultType<T, E>;
   }
 }

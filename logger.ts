@@ -30,7 +30,7 @@ type LogType = "data" | "error" | "warn" | "info" | "debug" | "trace";
 type LogContext = Array<LogEntry>;
 
 export class Logger {
-  private readonly context: LogContext;
+  public readonly context: LogContext;
 
   public constructor() {
     this.context = [
@@ -104,5 +104,9 @@ export class Logger {
       lastTime = logItem.time;
     }
     console.log("\n");
+  }
+
+  public getId() {
+    return this.context[0].value;
   }
 }
