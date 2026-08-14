@@ -46,7 +46,7 @@ export class Logger {
     for (const [k, v] of Object.entries(data)) {
       this.context.push({
         key: `[${type.toUpperCase().padEnd(5)}] ${k}`,
-        value: v,
+        value: JSON.stringify(v),
         time: new Date().getTime(),
       });
     }
@@ -76,7 +76,11 @@ export class Logger {
     this.push("trace", data);
   }
 
-  public print() {
+  public getId() {
+    return this.context[0].value;
+  }
+
+  private print() {
     let lastTime = this.context[0].time;
     const time = new Date(this.context[0].time);
     const pad = (n: number) => String(n).padStart(2, "0");
@@ -106,7 +110,8 @@ export class Logger {
     console.log("\n");
   }
 
-  public getId() {
-    return this.context[0].value;
+  public async dump() {
+    //custom dump function
+    this.print();
   }
 }
