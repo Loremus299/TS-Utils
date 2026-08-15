@@ -67,4 +67,26 @@ export class Result<T, E> {
   public type() {
     return this.value as ResultType<T, E>;
   }
+
+  public static settle<const Vs extends Array<Result<any, any>>>(
+    results: Vs,
+  ): Result<
+    { [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never },
+    null
+  > {
+    const settled: unknown[] = [];
+    for (const result of results) {
+      if (!result.value.success) {
+        return Result.error(null);
+      } else {
+        settled.push(result.value.data);
+      }
+    }
+
+    return Result.ok(
+      settled as {
+        [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never;
+      },
+    );
+  }
 }
