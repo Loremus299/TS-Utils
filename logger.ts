@@ -111,7 +111,11 @@ export class Logger {
   }
 
   public async dump() {
-    //custom dump function
+    const data = this.context;
+    const fun = async (data: LogContext) => {
+      //custom dump function
+    };
+    fun(data);
     this.print();
   }
 }
