@@ -68,18 +68,21 @@ export class Result<T, E> {
     return this.value as ResultType<T, E>;
   }
 
-  public static settle<const Vs extends Array<Result<any, any>>>(
+  public static async settle<const Vs extends Array<Promise<Result<any, any>>>>(
     results: Vs,
-  ): Result<
-    { [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never },
-    null
+  ): Promise<
+    Result<
+      { [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never },
+      null
+    >
   > {
     const settled: unknown[] = [];
     for (const result of results) {
-      if (!result.value.success) {
+      const res = await result;
+      if (!res.value.success) {
         return Result.error(null);
       } else {
-        settled.push(result.value.data);
+        settled.push(res.value.data);
       }
     }
 
