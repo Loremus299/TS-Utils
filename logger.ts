@@ -115,7 +115,7 @@ export class Logger {
     const fun = async (data: LogContext) => {
       //custom dump function
     };
-    fun(data);
+    await fun(data);
     this.print();
   }
 }
