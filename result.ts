@@ -17,6 +17,10 @@ export class Result<T, E> {
     return new Result<T, E>({ success: false, error: error });
   }
 
+  get result() {
+    return this.value;
+  }
+
   public static async fallback<T, E, V>(
     data: V,
     defaultError: E,
@@ -93,3 +97,5 @@ export class Result<T, E> {
     );
   }
 }
+
+const X = Result.ok("Hi");
