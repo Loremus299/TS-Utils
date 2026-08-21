@@ -97,5 +97,3 @@ export class Result<T, E> {
     );
   }
 }
-
-const X = Result.ok("Hi");
