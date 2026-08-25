@@ -76,7 +76,7 @@ export class Logger {
     this.push("trace", data);
   }
 
-  public getId() {
+  get id() {
     return this.context[0].value;
   }
 
