@@ -30,8 +30,11 @@ type LogType = "data" | "error" | "warn" | "info" | "debug" | "trace";
 type LogContext = Array<LogEntry>;
 
 export class Logger {
-  public readonly context: LogContext;
+  private readonly context: LogContext;
 
+  /**
+   * Construct a new logger context.
+   **/
   public constructor() {
     this.context = [
       {
@@ -52,30 +55,51 @@ export class Logger {
     }
   }
 
+  /**
+   * Logs user-provided data or input associated with an operation.
+   **/
   public data(data: Record<string, unknown>) {
     this.push("data", data);
   }
 
+  /**
+   * Logs an error.
+   **/
   public error(data: Record<string, unknown>) {
     this.push("error", data);
   }
 
+  /**
+   * Logs a potential problem.
+   **/
   public warn(data: Record<string, unknown>) {
     this.push("warn", data);
   }
 
+  /**
+   * Logs information about a request, operation, or application state.
+   **/
   public info(data: Record<string, unknown>) {
     this.push("info", data);
   }
 
+  /**
+   * Logging every small little variable and detail.
+   **/
   public debug(data: Record<string, unknown>) {
     this.push("debug", data);
   }
 
+  /**
+   * Logging an operation across multiple functions.
+   **/
   public trace(data: Record<string, unknown>) {
     this.push("trace", data);
   }
 
+  /**
+   * Returns the identifier for the logger context.
+   **/
   get id() {
     return this.context[0].value;
   }
@@ -110,6 +134,9 @@ export class Logger {
     console.log("\n");
   }
 
+  /**
+   * Dumps the log context using custom function and prints it to console.
+   **/
   public async dump() {
     const data = this.context;
     const fun = async (data: LogContext) => {
