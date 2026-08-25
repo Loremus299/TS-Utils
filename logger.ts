@@ -21,7 +21,7 @@ function colorForKey(key: string) {
 
 interface LogEntry {
   key: string;
-  value: unknown;
+  value: string;
   time: number;
 }
 
