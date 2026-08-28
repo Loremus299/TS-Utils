@@ -33,6 +33,7 @@ export interface drizzleOpsInterface {
   update: <T extends AnyPgTable>(
     table: T,
     data: Partial<InferInsertModel<T>>,
+    condition: Condition<T>,
     tx?: DB,
   ) => Promise<InferSelectModel<T>>;
 
