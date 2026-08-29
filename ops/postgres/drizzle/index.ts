@@ -64,28 +64,36 @@ interface DrizzleOpsInterface {
 
 const drizzleOps: DrizzleOpsInterface = {
   async executeQuery(query) {
-    return await query.execute();
+    // const { sql, params } = query.toSQL();
+    // console.log(sql) --> debug;
+    // console.log(params) --> debug;
+    const rows = await query.execute();
+    // console.log(rows) --> debug;
+    return rows;
   },
 
   async insert(table, data, tx) {
-    const t = tx!;
-    const rows = (await t
-      .insert(table)
-      .values(data)
-      .returning()) as InferSelectModel<typeof table>[];
+    const t = tx!; //?? db;
+    //console.log(data) --> info;
+    const [row] = (await drizzleOps.executeQuery(
+      t.insert(table).values(data).returning(),
+    )) as InferSelectModel<typeof table>[];
 
-    return rows[0] as InferSelectModel<typeof table>;
+    // console.log(row) --> debug;
+    return row as InferSelectModel<typeof table>;
   },
 
   async readTable(table, data, tx) {
-    const t = tx!;
+    const t = tx!; //?? db;
+    //console.log(data) --> info;
+
     const columns = getColumns(table);
     const conditions: SQL[] = [];
 
     for (const [key, value] of Object.entries(data)) {
       if (value !== undefined && key in columns) {
-        console.log(key);
         const column = columns[key as keyof typeof columns];
+        // console.log(column?.name, value) --> info;
         conditions.push(eq(column as AnyColumn, value as never));
       }
     }
@@ -99,13 +107,15 @@ const drizzleOps: DrizzleOpsInterface = {
   },
 
   async readTableUnique(table, data, tx) {
-    const t = tx!;
+    const t = tx!; //?? db;
+    //console.log(data) --> info;
+
     const columns = getColumns(table);
     const conditions: SQL[] = [];
 
     for (const [key, value] of Object.entries(data)) {
       if (value !== undefined && key in columns) {
-        console.log(key);
+        // console.log(column?.name, value) --> info;
         const column = columns[key as keyof typeof columns];
         conditions.push(eq(column as AnyColumn, value as never));
       }
@@ -118,30 +128,32 @@ const drizzleOps: DrizzleOpsInterface = {
         .where(and(...conditions)),
     )) as InferSelectModel<typeof table>[];
 
-    return rows[0] as InferSelectModel<typeof table>;
+    if (rows.length !== 1) {
+      return rows[0] as InferSelectModel<typeof table>;
+    } else {
+      throw new Error("The data is not unique or unavailable.");
+    }
   },
 
   async update(table, data, condition, tx) {
     const t = tx!;
+    //console.log(data) --> info;
 
-    const rows = (await t
-      .update(table)
-      .set(data)
-      .where(condition(table))
-      .returning()) as InferSelectModel<typeof table>[];
+    const [row] = (await drizzleOps.executeQuery(
+      t.update(table).set(data).where(condition(table)).returning(),
+    )) as InferSelectModel<typeof table>[];
 
-    return rows[0] as InferSelectModel<typeof table>;
+    return row as InferSelectModel<typeof table>;
   },
 
   async delete(table, condition, tx) {
     const t = tx!;
 
-    const rows = (await t
-      .delete(table)
-      .where(condition(table))
-      .returning()) as InferSelectModel<typeof table>[];
+    const [row] = (await drizzleOps.executeQuery(
+      t.delete(table).where(condition(table)).returning(),
+    )) as InferSelectModel<typeof table>[];
 
-    return rows[0] as InferSelectModel<typeof table>;
+    return row as InferSelectModel<typeof table>;
   },
 };
 
