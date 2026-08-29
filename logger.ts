@@ -27,7 +27,7 @@ interface LogEntry {
 
 type LogType = "data" | "error" | "warn" | "info" | "debug" | "trace";
 
-type LogContext = [Array<LogEntry>, Array<Logger>];
+type LogContext = [Array<LogEntry>, Array<Logger>, number];
 
 export class Logger {
   private readonly context: LogContext;
@@ -35,7 +35,7 @@ export class Logger {
   /**
    * Construct a new logger context.
    **/
-  public constructor() {
+  public constructor(nest?: number) {
     this.context = [
       [
         {
@@ -45,6 +45,7 @@ export class Logger {
         },
       ],
       [],
+      nest ?? 0,
     ];
   }
 
@@ -56,6 +57,15 @@ export class Logger {
         time: new Date().getTime(),
       });
     }
+  }
+
+  public nest() {
+    const child = new Logger(this.context[2] + 1);
+    this.context[1].push(child);
+    this.data({
+      "sub-logger": `${child.id} @ nest ${child.context[2]}`,
+    });
+    return child;
   }
 
   /**
@@ -109,6 +119,7 @@ export class Logger {
 
   private print() {
     let lastTime = this.context[0][0].time;
+    const nestPad = "─── ".repeat(this.context[2]);
     const time = new Date(this.context[0][0].time);
     const pad = (n: number) => String(n).padStart(2, "0");
     const formattedTime =
@@ -118,9 +129,8 @@ export class Logger {
 
     const lastLogItem = this.context[0][this.context[0].length - 1];
 
-    console.log(
-      `${C.blue}┌─ ${this.context[0][0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
-    );
+    const line = `${C.blue}${nestPad}┌─ ${this.context[0][0].value} @ ${formattedTime} [NEST = ${this.context[2]}]`;
+    console.log(`${line} ${"─".repeat(150 - line.length)}${C.reset}`);
 
     for (const logItem of this.context[0].slice(1)) {
       const delta = ("⏱ " + String(logItem.time - lastTime)).padEnd(8);
@@ -129,12 +139,11 @@ export class Logger {
       const symbol = logItem === lastLogItem ? "└─" : "├─";
 
       console.log(
-        `${color}${symbol} ${delta} ${paddedKey} │ ${logItem.value}${C.reset}`,
+        `${color}${nestPad}${symbol} ${delta} ${paddedKey} │ ${logItem.value}${C.reset}`,
       );
 
       lastTime = logItem.time;
     }
-    console.log("\n");
   }
 
   private async dumpLogger() {
@@ -150,9 +159,44 @@ export class Logger {
    * Dumps the log context using custom function and prints it to console.
    **/
   public async dump() {
+    await this.dumpLogger();
     const loggers = this.context[1];
     for (const logger of loggers) {
       await logger.dump();
     }
   }
 }
+
+async function a() {
+  const log = new Logger();
+  log.info({ function: "a" });
+  log.info({ function: "a" });
+  log.info({ function: "a" });
+  b(log.nest());
+  log.info({ function: "a" });
+  log.info({ function: "a" });
+  log.info({ function: "a" });
+  c(log.nest());
+  log.info({ function: "a" });
+  log.info({ function: "a" });
+  log.info({ function: "a" });
+  await log.dump();
+}
+
+function b(log: Logger) {
+  log.info({ function: "b" });
+  log.info({ function: "b" });
+  log.info({ function: "b" });
+  c(log.nest());
+  log.info({ function: "b" });
+  log.info({ function: "b" });
+  log.info({ function: "b" });
+}
+
+function c(log: Logger) {
+  log.info({ function: "c" });
+  log.info({ function: "c" });
+  log.info({ function: "c" });
+}
+
+a();
