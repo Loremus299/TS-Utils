@@ -27,7 +27,7 @@ interface LogEntry {
 
 type LogType = "data" | "error" | "warn" | "info" | "debug" | "trace";
 
-type LogContext = Array<LogEntry>;
+type LogContext = [Array<LogEntry>, Array<Logger>];
 
 export class Logger {
   private readonly context: LogContext;
@@ -37,17 +37,20 @@ export class Logger {
    **/
   public constructor() {
     this.context = [
-      {
-        key: "RequestId",
-        value: globalThis.crypto.randomUUID(),
-        time: new Date().getTime(),
-      },
+      [
+        {
+          key: "RequestId",
+          value: globalThis.crypto.randomUUID(),
+          time: new Date().getTime(),
+        },
+      ],
+      [],
     ];
   }
 
   private push(type: LogType, data: Record<string, unknown>) {
     for (const [k, v] of Object.entries(data)) {
-      this.context.push({
+      this.context[0].push({
         key: `[${type.toUpperCase().padEnd(5)}] ${k}`,
         value: JSON.stringify(v),
         time: new Date().getTime(),
@@ -101,25 +104,25 @@ export class Logger {
    * Returns the identifier for the logger context.
    **/
   get id() {
-    return this.context[0].value;
+    return this.context[0][0].value;
   }
 
   private print() {
-    let lastTime = this.context[0].time;
-    const time = new Date(this.context[0].time);
+    let lastTime = this.context[0][0].time;
+    const time = new Date(this.context[0][0].time);
     const pad = (n: number) => String(n).padStart(2, "0");
     const formattedTime =
       `${time.getFullYear()}-${pad(time.getMonth() + 1)}-${pad(time.getDate())}` +
       ` ${pad(time.getHours())}:${pad(time.getMinutes())}:${pad(time.getSeconds())}` +
       `.${pad(time.getMilliseconds())}`;
 
-    const lastLogItem = this.context[this.context.length - 1];
+    const lastLogItem = this.context[0][this.context[0].length - 1];
 
     console.log(
-      `${C.blue}┌─ ${this.context[0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
+      `${C.blue}┌─ ${this.context[0][0].value} @ ${formattedTime} ${"─".repeat(50)}${C.reset}`,
     );
 
-    for (const logItem of this.context.slice(1)) {
+    for (const logItem of this.context[0].slice(1)) {
       const delta = ("⏱ " + String(logItem.time - lastTime)).padEnd(8);
       const paddedKey = logItem.key.padEnd(30);
       const color = colorForKey(logItem.key);
@@ -134,15 +137,22 @@ export class Logger {
     console.log("\n");
   }
 
-  /**
-   * Dumps the log context using custom function and prints it to console.
-   **/
-  public async dump() {
-    const data = this.context;
-    const fun = async (data: LogContext) => {
+  private async dumpLogger() {
+    const data = this.context[0];
+    const fun = async (data: LogEntry[]) => {
       //custom dump function
     };
     await fun(data);
     this.print();
+  }
+
+  /**
+   * Dumps the log context using custom function and prints it to console.
+   **/
+  public async dump() {
+    const loggers = this.context[1];
+    for (const logger of loggers) {
+      await logger.dump();
+    }
   }
 }
