@@ -166,37 +166,3 @@ export class Logger {
     }
   }
 }
-
-async function a() {
-  const log = new Logger();
-  log.info({ function: "a" });
-  log.info({ function: "a" });
-  log.info({ function: "a" });
-  b(log.nest());
-  log.info({ function: "a" });
-  log.info({ function: "a" });
-  log.info({ function: "a" });
-  c(log.nest());
-  log.info({ function: "a" });
-  log.info({ function: "a" });
-  log.info({ function: "a" });
-  await log.dump();
-}
-
-function b(log: Logger) {
-  log.info({ function: "b" });
-  log.info({ function: "b" });
-  log.info({ function: "b" });
-  c(log.nest());
-  log.info({ function: "b" });
-  log.info({ function: "b" });
-  log.info({ function: "b" });
-}
-
-function c(log: Logger) {
-  log.info({ function: "c" });
-  log.info({ function: "c" });
-  log.info({ function: "c" });
-}
-
-a();
