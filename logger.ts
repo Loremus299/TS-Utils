@@ -59,6 +59,9 @@ export class Logger {
     }
   }
 
+  /**
+   * Creates a new logger instance and appends it to current logContext with a deeper nesting.
+   **/
   public nest() {
     const child = new Logger(this.context[2] + 1);
     this.context[1].push(child);
