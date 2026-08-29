@@ -19,7 +19,7 @@ type Condition<T> = (
   t: T,
 ) => SQL | ReturnType<typeof and> | ReturnType<typeof or>;
 
-export interface drizzleOpsInterface {
+interface drizzleOpsInterface {
   insert: <T extends AnyPgTable>(
     table: T,
     data: InferInsertModel<T>,
