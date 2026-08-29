@@ -28,13 +28,13 @@ type ExecutableQuery<TResult> = {
 };
 
 interface DrizzleOpsInterface {
+  executeQuery: <TResult>(query: ExecutableQuery<TResult>) => Promise<TResult>;
+
   insert: <T extends AnyPgTable>(
     table: T,
     data: InferInsertModel<T>,
     tx?: DB,
   ) => Promise<InferSelectModel<T>>;
-
-  read: <TResult>(query: ExecutableQuery<TResult>) => Promise<TResult>;
 
   readTable: <T extends AnyPgTable>(
     table: T,
@@ -63,6 +63,10 @@ interface DrizzleOpsInterface {
 }
 
 const drizzleOps: DrizzleOpsInterface = {
+  async executeQuery(query) {
+    return await query.execute();
+  },
+
   async insert(table, data, tx) {
     const t = tx!;
     const rows = (await t
@@ -71,10 +75,6 @@ const drizzleOps: DrizzleOpsInterface = {
       .returning()) as InferSelectModel<typeof table>[];
 
     return rows[0] as InferSelectModel<typeof table>;
-  },
-
-  async read(query) {
-    return await query.execute();
   },
 
   async readTable(table, data, tx) {
@@ -90,7 +90,7 @@ const drizzleOps: DrizzleOpsInterface = {
       }
     }
 
-    return (await drizzleOps.read(
+    return (await drizzleOps.executeQuery(
       t
         .select()
         .from(table as AnyPgTable)
@@ -111,7 +111,7 @@ const drizzleOps: DrizzleOpsInterface = {
       }
     }
 
-    const rows = (await drizzleOps.read(
+    const rows = (await drizzleOps.executeQuery(
       t
         .select()
         .from(table as AnyPgTable)
