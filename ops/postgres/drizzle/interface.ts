@@ -30,6 +30,18 @@ export interface drizzleOpsInterface {
 
   readUnique: <T extends PgAsyncSelect>(query: T) => Promise<QueryResult<T>>;
 
+  readTable: <T extends AnyPgTable>(
+    table: T,
+    data: Partial<InferInsertModel<T>>,
+    tx?: DB,
+  ) => Promise<InferSelectModel<T>[]>;
+
+  readTableUnique: <T extends AnyPgTable>(
+    table: T,
+    data: Partial<InferInsertModel<T>>,
+    tx?: DB,
+  ) => Promise<InferSelectModel<T>>;
+
   update: <T extends AnyPgTable>(
     table: T,
     data: Partial<InferInsertModel<T>>,
