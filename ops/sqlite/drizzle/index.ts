@@ -3,19 +3,17 @@ import {
   eq,
   getColumns,
   type AnyColumn,
-  type EmptyRelations,
   type InferInsertModel,
   type InferSelectModel,
   type or,
   type SQL,
 } from "drizzle-orm";
 import type {
-  AnyPgTable,
-  PgAsyncTransaction,
-  PgQueryResultHKT,
-} from "drizzle-orm/pg-core";
+  AnySQLiteTable,
+  SQLiteAsyncTransaction,
+} from "drizzle-orm/sqlite-core";
 
-type DB = PgAsyncTransaction<PgQueryResultHKT, EmptyRelations>; //| typeof db;
+type DB = SQLiteAsyncTransaction<"sync" | "async", unknown, any>;
 type Condition<T> = (
   t: T,
 ) => SQL | ReturnType<typeof and> | ReturnType<typeof or>;
@@ -30,32 +28,32 @@ type ExecutableQuery<TResult> = {
 interface DrizzleOpsInterface {
   executeQuery: <TResult>(query: ExecutableQuery<TResult>) => Promise<TResult>;
 
-  insert: <T extends AnyPgTable>(
+  insert: <T extends AnySQLiteTable>(
     table: T,
     data: InferInsertModel<T>,
     tx?: DB,
   ) => Promise<InferSelectModel<T>>;
 
-  readTable: <T extends AnyPgTable>(
+  readTable: <T extends AnySQLiteTable>(
     table: T,
     data: Partial<InferInsertModel<T>>,
     tx?: DB,
   ) => Promise<InferSelectModel<T>[]>;
 
-  readTableUnique: <T extends AnyPgTable>(
+  readTableUnique: <T extends AnySQLiteTable>(
     table: T,
     data: Partial<InferInsertModel<T>>,
     tx?: DB,
   ) => Promise<InferSelectModel<T>>;
 
-  update: <T extends AnyPgTable>(
+  update: <T extends AnySQLiteTable>(
     table: T,
     data: Partial<InferInsertModel<T>>,
     condition: Condition<T>,
     tx?: DB,
   ) => Promise<InferSelectModel<T>>;
 
-  delete: <T extends AnyPgTable>(
+  delete: <T extends AnySQLiteTable>(
     table: T,
     condition: Condition<T>,
     tx?: DB,
@@ -101,7 +99,7 @@ const drizzleOps: DrizzleOpsInterface = {
     return (await drizzleOps.executeQuery(
       t
         .select()
-        .from(table as AnyPgTable)
+        .from(table as AnySQLiteTable)
         .where(and(...conditions)),
     )) as InferSelectModel<typeof table>[];
   },
@@ -124,7 +122,7 @@ const drizzleOps: DrizzleOpsInterface = {
     const rows = (await drizzleOps.executeQuery(
       t
         .select()
-        .from(table as AnyPgTable)
+        .from(table as AnySQLiteTable)
         .where(and(...conditions)),
     )) as InferSelectModel<typeof table>[];
 
