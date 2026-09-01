@@ -62,11 +62,11 @@ export class Logger {
   /**
    * Creates a new logger instance and appends it to current logContext with a deeper nesting.
    **/
-  public nest() {
+  public nest(title?: string) {
     const child = new Logger(this.context[2] + 1);
     this.context[1].push(child);
     this.data({
-      "sub-logger": `${child.id} @ nest ${child.context[2]}`,
+      "sub-logger": `${title ? `${title}` : child.id} @ nest ${child.context[2]}`,
     });
     return child;
   }
@@ -117,13 +117,13 @@ export class Logger {
    * Returns the identifier for the logger context.
    **/
   get id() {
-    return this.context[0][0].value;
+    return this.context[0][0]!.value;
   }
 
   private print() {
-    let lastTime = this.context[0][0].time;
+    let lastTime = this.context[0][0]!.time;
     const nestPad = "─── ".repeat(this.context[2]);
-    const time = new Date(this.context[0][0].time);
+    const time = new Date(this.context[0][0]!.time);
     const pad = (n: number) => String(n).padStart(2, "0");
     const formattedTime =
       `${time.getFullYear()}-${pad(time.getMonth() + 1)}-${pad(time.getDate())}` +
@@ -132,7 +132,7 @@ export class Logger {
 
     const lastLogItem = this.context[0][this.context[0].length - 1];
 
-    const line = `${C.blue}${nestPad}┌─ ${this.context[0][0].value} @ ${formattedTime} [NEST = ${this.context[2]}]`;
+    const line = `${C.blue}${nestPad}┌─ ${this.context[0][0]!.value} @ ${formattedTime} [NEST = ${this.context[2]}]`;
     console.log(`${line} ${"─".repeat(150 - line.length)}${C.reset}`);
 
     for (const logItem of this.context[0].slice(1)) {
