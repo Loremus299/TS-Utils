@@ -68,6 +68,11 @@ export class Result<T, E> {
       : Result.error<T, F>(fun(this.value.error));
   }
 
+  public unrelated(fun: () => {}) {
+    fun();
+    return this;
+  }
+
   public type() {
     return this.value as ResultType<T, E>;
   }
