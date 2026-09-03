@@ -73,14 +73,14 @@ export class Result<T, E> {
     return this;
   }
 
-  public onOk<R>(fun: (arg: T) => R): Result<T, E> {
+  public onOk(fun: (arg: T) => unknown): Result<T, E> {
     if (this.value.success) {
       fun(this.value.data);
     }
     return this;
   }
 
-  public onError<R>(fun: (arg: E) => R): Result<T, E> {
+  public onError(fun: (arg: E) => unknown): Result<T, E> {
     if (!this.value.success) {
       fun(this.value.error);
     }
