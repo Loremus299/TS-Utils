@@ -14,10 +14,10 @@ export class Result<T, E> {
   }
 
   public static error<T, E>(error: E): Result<T, E> {
-    return new Result<T, E>({ success: false, error: error });
+    return new Result<T, E>({ success: false, error });
   }
 
-  get result() {
+  get type() {
     return this.value;
   }
 
@@ -85,10 +85,6 @@ export class Result<T, E> {
       fun(this.value.error);
     }
     return this;
-  }
-
-  public type() {
-    return this.value as ResultType<T, E>;
   }
 
   public static async settle<const Vs extends Array<Promise<Result<any, any>>>>(
