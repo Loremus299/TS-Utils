@@ -68,8 +68,22 @@ export class Result<T, E> {
       : Result.error<T, F>(fun(this.value.error));
   }
 
-  public unrelated(fun: () => {}) {
+  public unrelated(fun: () => {}): Result<T, E> {
     fun();
+    return this;
+  }
+
+  public onOk<R>(fun: (arg: T) => R): Result<T, E> {
+    if (this.value.success) {
+      fun(this.value.data);
+    }
+    return this;
+  }
+
+  public onError<R>(fun: (arg: E) => R): Result<T, E> {
+    if (!this.value.success) {
+      fun(this.value.error);
+    }
     return this;
   }
 
