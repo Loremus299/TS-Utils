@@ -74,9 +74,70 @@ interface DrizzleOpsInterface {
     log: Logger,
     tx?: DB,
   ) => Promise<Result<InferSelectModel<T>, unknown>>;
+
+  createCrud: <
+    T extends AnyPgTable,
+    C extends T["_"]["columns"][keyof T["_"]["columns"]],
+  >(
+    table: T,
+    identifier: C,
+  ) => {
+    insert: (
+      data: InferInsertModel<T>,
+      log: Logger,
+      tx?: DB,
+    ) => Promise<Result<InferSelectModel<T>, unknown>>;
+    identify: (
+      id: string,
+      log: Logger,
+      tx?: DB,
+    ) => Promise<Result<InferSelectModel<T>, unknown>>;
+    update: (
+      id: string,
+      data: Partial<InferInsertModel<T>>,
+      log: Logger,
+      tx?: DB,
+    ) => Promise<Result<InferSelectModel<T>, unknown>>;
+    delete: (
+      id: string,
+      log: Logger,
+      tx?: DB,
+    ) => Promise<Result<InferSelectModel<T>, unknown>>;
+  };
 }
 
 const drizzleOps: DrizzleOpsInterface = {
+  createCrud(table, identifier) {
+    return {
+      insert(data, log, tx) {
+        return drizzleOps.insert(table, data, log, tx);
+      },
+
+      identify(id, log, tx) {
+        return drizzleOps.readTableUnique(
+          table,
+          { [identifier.name]: id } as Partial<InferInsertModel<typeof table>>,
+          log,
+          tx,
+        );
+      },
+
+      update(id, data, log, tx) {
+        return drizzleOps.update(
+          table,
+          data,
+          () => eq(identifier, id),
+          log,
+          tx,
+        );
+      },
+
+      delete(id, log, tx) {
+        return drizzleOps.delete(table, () => eq(identifier, id), log, tx);
+      },
+    };
+  },
+
   async executeQuery(query, log) {
     const { sql, params } = query.toSQL();
     log.info({ query: sql });
