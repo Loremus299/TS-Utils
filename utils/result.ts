@@ -17,10 +17,6 @@ export class Result<T, E> {
     return new Result<T, E>({ success: false, error });
   }
 
-  get type() {
-    return this.value;
-  }
-
   public static async fallback<T, E, V>(
     data: V,
     defaultError: E,
@@ -112,5 +108,26 @@ export class Result<T, E> {
         [K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never;
       },
     );
+  }
+
+  public isOk(): this is Result<T, E> & { value: { success: true; data: T } } {
+    return this.value.success;
+  }
+
+  public isError(): this is Result<T, E> & {
+    value: { success: false; error: E };
+  } {
+    return !this.value.success;
+  }
+
+  get data(): this extends { value: { success: true; data: T } }
+    ? T
+    : this extends { value: { success: false; error: E } }
+      ? E
+      : T | E {
+    if (this.value.success) {
+      return this.value.data as any;
+    }
+    return this.value.error as any;
   }
 }
