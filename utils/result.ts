@@ -124,7 +124,7 @@ export class Result<T, E> {
     ? T
     : this extends { value: { success: false; error: E } }
       ? E
-      : T | E {
+      : Result<T, E> {
     if (this.value.success) {
       return this.value.data as any;
     }
