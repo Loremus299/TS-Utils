@@ -68,7 +68,7 @@ export class Result<T, E> {
       : Result.error<T, F>(fun(this.value.error));
   }
 
-  public unrelated(fun: () => {}): Result<T, E> {
+  public unrelated(fun: () => unknown): Result<T, E> {
     fun();
     return this;
   }
@@ -87,11 +87,13 @@ export class Result<T, E> {
     return this;
   }
 
-  public static async settle<const Vs extends Array<Promise<Result<any, any>>>>(
+  public static async settle<
+    const Vs extends Array<Promise<Result<unknown, unknown>>>,
+  >(
     results: Vs,
   ): Promise<
     Result<
-      { [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never },
+      { [K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never },
       null
     >
   > {
@@ -107,7 +109,7 @@ export class Result<T, E> {
 
     return Result.ok(
       settled as {
-        [K in keyof Vs]: Vs[K] extends Result<infer T, any> ? T : never;
+        [K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never;
       },
     );
   }
