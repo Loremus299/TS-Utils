@@ -48,6 +48,33 @@ export class Result<T, E> {
     }
   }
 
+  public static async settle<
+    const Vs extends Array<Promise<Result<unknown, unknown>>>,
+  >(
+    results: Vs,
+  ): Promise<
+    Result<
+      { [K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never },
+      null
+    >
+  > {
+    const settled: unknown[] = [];
+    for (const result of results) {
+      const res = await result;
+      if (!res.value.success) {
+        return Result.error(null);
+      } else {
+        settled.push(res.value.data);
+      }
+    }
+
+    return Result.ok(
+      settled as {
+        [K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never;
+      },
+    );
+  }
+
   public match<R>(onOk: (t: T) => R, onErr: (e: E) => R): R {
     return this.value.success ? onOk(this.value.data) : onErr(this.value.error);
   }
@@ -81,33 +108,6 @@ export class Result<T, E> {
       fun(this.value.error);
     }
     return this;
-  }
-
-  public static async settle<
-    const Vs extends Array<Promise<Result<unknown, unknown>>>,
-  >(
-    results: Vs,
-  ): Promise<
-    Result<
-      { [K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never },
-      null
-    >
-  > {
-    const settled: unknown[] = [];
-    for (const result of results) {
-      const res = await result;
-      if (!res.value.success) {
-        return Result.error(null);
-      } else {
-        settled.push(res.value.data);
-      }
-    }
-
-    return Result.ok(
-      settled as {
-        [K in keyof Vs]: Vs[K] extends Result<infer T, unknown> ? T : never;
-      },
-    );
   }
 
   public isOk(): this is Result<T, E> & { value: { success: true; data: T } } {
