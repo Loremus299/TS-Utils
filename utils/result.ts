@@ -130,4 +130,8 @@ export class Result<T, E> {
     }
     return this.value.error as any;
   }
+
+  public type() {
+    return this.value as ResultType<T, E>;
+  }
 }
