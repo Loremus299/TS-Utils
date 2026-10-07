@@ -1,3 +1,5 @@
+import z from "zod";
+
 type JSONValue =
   | string
   | number
@@ -42,7 +44,7 @@ interface OpenAPIPaths {
 }
 
 interface OpenAPIObjects {
-  schema?: JSONValue;
+  schema?: Record<string, unknown>;
   example?: JSONValue;
 }
 
@@ -124,10 +126,7 @@ class OpenAPI {
         pathMethodItem.requestBody = requestBody;
       },
 
-      addResponse(status: string, response: OpenAPIResponses[string]) {
-        pathMethodItem.responses ??= {};
-        pathMethodItem.responses[status] = response;
-      },
+      addResponse(status: string, response: z.ZodType) {},
     };
   }
 }
