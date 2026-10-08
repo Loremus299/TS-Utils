@@ -1,3 +1,27 @@
+import type z from "zod";
+
+interface OpenAPI {
+  openapi: string;
+
+  info: {
+    title: string;
+    description: string;
+    version: string;
+  };
+
+  paths: OpenAPIPath;
+}
+
+type HTTPMethod =
+  | "get"
+  | "post"
+  | "put"
+  | "patch"
+  | "delete"
+  | "head"
+  | "options"
+  | "trace";
+
 interface OpenAPIPath {
   [path: string]: {
     [method: string]: {
@@ -6,6 +30,8 @@ interface OpenAPIPath {
       tags?: string[];
 
       parameters?: OpenAPIParameter[];
+      requestBody?: {};
+      responses: {};
     };
   };
 }
@@ -13,33 +39,43 @@ interface OpenAPIPath {
 interface OpenAPIParameter {
   name: string;
   description?: string;
-  in: "query" | "path" | "header" | "cookie";
-  required: boolean;
+  in?: "query" | "path" | "header" | "cookie";
+  required?: boolean;
   schema: {
     type: string;
-    format: string;
+    format?: string;
   };
-  example: unknown;
+  example?: unknown;
 }
 
 class OpenAPIPathHandler {
-  path: OpenAPIPath;
+  pathObject: OpenAPIPath;
+  private operation: OpenAPIPath[string][HTTPMethod];
 
   constructor(
     path: string,
-    method: string,
-    summary?: string,
-    tags?: string[],
-    description?: string,
+    method: HTTPMethod,
+    {
+      summary,
+      description,
+      tags,
+    }: { summary?: string; description?: string; tags?: string[] },
   ) {
-    this.path = {
+    this.operation = {
+      ...(summary && { summary }),
+      ...(description && { description }),
+      ...(tags && { tags }),
+      responses: {},
+    };
+
+    this.pathObject = {
       [path]: {
-        [method]: {
-          ...(summary && { summary }),
-          ...(description && { description }),
-          ...(tags && { tags }),
-        },
+        [method]: this.operation,
       },
     };
+  }
+
+  parameter(arr: z.ZodArray) {
+    this.operation.parameters = [];
   }
 }
