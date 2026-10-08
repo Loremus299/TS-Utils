@@ -200,6 +200,88 @@ export class OpenAPIHandler {
     }
   }
 
+  headerParameters(path: string, method: HTTPMethod, schema: z.ZodObject) {
+    const shape = schema.shape;
+
+    const jsonSchema = z.toJSONSchema(schema, {
+      target: "openapi-3.0",
+    }) as {
+      properties: Record<
+        string,
+        {
+          type?: string;
+          format?: string;
+          enum?: unknown[];
+          default?: unknown;
+        }
+      >;
+      required?: string[];
+    };
+
+    this.openAPIObject.paths[path] ??= {};
+    this.openAPIObject.paths[path][method] ??= {};
+    this.openAPIObject.paths[path][method].parameters ??= [];
+
+    for (const [key, schema] of Object.entries(shape)) {
+      const property = jsonSchema.properties[key]!;
+
+      this.openAPIObject.paths[path][method].parameters.push({
+        name: key,
+        description: schema.meta()?.description,
+        in: "header",
+        required: jsonSchema.required?.includes(key) ?? false,
+        schema: {
+          type: property.type!,
+          format: property.format,
+          enum: property.enum,
+          default: property.default,
+        },
+        example: schema.meta()?.example,
+      });
+    }
+  }
+
+  cookieParameters(path: string, method: HTTPMethod, schema: z.ZodObject) {
+    const shape = schema.shape;
+
+    const jsonSchema = z.toJSONSchema(schema, {
+      target: "openapi-3.0",
+    }) as {
+      properties: Record<
+        string,
+        {
+          type?: string;
+          format?: string;
+          enum?: unknown[];
+          default?: unknown;
+        }
+      >;
+      required?: string[];
+    };
+
+    this.openAPIObject.paths[path] ??= {};
+    this.openAPIObject.paths[path][method] ??= {};
+    this.openAPIObject.paths[path][method].parameters ??= [];
+
+    for (const [key, schema] of Object.entries(shape)) {
+      const property = jsonSchema.properties[key]!;
+
+      this.openAPIObject.paths[path][method].parameters.push({
+        name: key,
+        description: schema.meta()?.description,
+        in: "cookie",
+        required: jsonSchema.required?.includes(key) ?? false,
+        schema: {
+          type: property.type!,
+          format: property.format,
+          enum: property.enum,
+          default: property.default,
+        },
+        example: schema.meta()?.example,
+      });
+    }
+  }
+
   response(
     path: string,
     method: HTTPMethod,
