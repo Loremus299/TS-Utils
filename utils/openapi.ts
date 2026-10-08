@@ -173,4 +173,8 @@ export class OpenAPIHandler {
       paths: {},
     };
   }
+
+  export() {
+    return JSON.stringify(this.openAPIObject, null, 2);
+  }
 }
