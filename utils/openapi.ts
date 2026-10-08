@@ -1,4 +1,4 @@
-import type z from "zod";
+import z from "zod";
 
 interface OpenAPI {
   openapi: string;
@@ -40,7 +40,7 @@ interface OpenAPIParameter {
   name: string;
   description?: string;
   in?: "query" | "path" | "header" | "cookie";
-  required?: boolean;
+  required: boolean;
   schema: {
     type: string;
     format?: string;
@@ -76,6 +76,35 @@ class OpenAPIPathHandler {
   }
 
   parameter(arr: z.ZodArray) {
+    const shape = (arr.element as z.ZodObject).shape;
+
+    const itemSchema = z.toJSONSchema(arr).items! as {
+      properties: Record<
+        string,
+        {
+          type?: string;
+          format?: string;
+        }
+      >;
+      required?: string[];
+    };
+
     this.operation.parameters = [];
+
+    for (const [key, schema] of Object.entries(shape)) {
+      const property = itemSchema.properties[key]!;
+
+      this.operation.parameters?.push({
+        name: key,
+        description: schema.meta()?.description,
+        in: schema.meta()?.in,
+        required: itemSchema.required?.includes(key) ?? false,
+        schema: {
+          type: property.type!,
+          format: property.format,
+        },
+        example: schema.meta()?.example,
+      });
+    }
   }
 }
