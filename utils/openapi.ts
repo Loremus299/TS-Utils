@@ -179,6 +179,31 @@ export class OpenAPIHandler {
     }
   }
 
+  response(
+    path: string,
+    method: HTTPMethod,
+    status: string,
+    description: string,
+    schema: z.ZodObject,
+  ) {
+    this.openAPIObject.paths[path] ??= {};
+    this.openAPIObject.paths[path][method] ??= {};
+    this.openAPIObject.paths[path][method].responses ??= {};
+
+    const JSONSchema = z.toJSONSchema(schema) as OpenAPIResponseSchema;
+    const example = Object.fromEntries(
+      Object.entries(schema.shape).map(([key, field]) => [
+        key,
+        field.meta()?.example,
+      ]),
+    );
+
+    this.openAPIObject.paths[path][method].responses[status] = {
+      description,
+      content: { "application/json": { example, schema: JSONSchema } },
+    };
+  }
+
   export() {
     return JSON.stringify(this.openAPIObject, null, 2);
   }
