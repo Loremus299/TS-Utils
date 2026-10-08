@@ -65,7 +65,7 @@ interface OpenAPIResponse {
     content: {
       "application/json": {
         schema: OpenAPIResponseSchema;
-        example: Record<string, unknown>;
+        example: unknown;
       };
     };
   };
@@ -190,13 +190,25 @@ export class OpenAPIHandler {
     this.openAPIObject.paths[path][method] ??= {};
     this.openAPIObject.paths[path][method].responses ??= {};
 
+    const exampleExtractor = (field: any): unknown => {
+      if (field instanceof z.ZodArray) {
+        return [exampleExtractor(field.element)];
+      }
+
+      if (field instanceof z.ZodObject) {
+        return Object.fromEntries(
+          Object.entries(field.shape).map(([key, value]) => [
+            key,
+            exampleExtractor(value),
+          ]),
+        );
+      }
+
+      return field.meta()?.example;
+    };
+
     const JSONSchema = z.toJSONSchema(schema) as OpenAPIResponseSchema;
-    const example = Object.fromEntries(
-      Object.entries(schema.shape).map(([key, field]) => [
-        key,
-        field.meta()?.example,
-      ]),
-    );
+    const example = exampleExtractor(schema);
 
     this.openAPIObject.paths[path][method].responses[status] = {
       description,
