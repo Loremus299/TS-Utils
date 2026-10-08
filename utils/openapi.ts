@@ -30,7 +30,7 @@ interface OpenAPIPath {
       tags?: string[];
 
       parameters?: OpenAPIParameter[];
-      requestBody?: {};
+      requestBody?: OpenAPIRequestBody;
       responses?: OpenAPIResponse;
     };
   };
@@ -48,6 +48,27 @@ interface OpenAPIParameter {
     default?: unknown;
   };
   example?: unknown;
+}
+
+interface OpenAPIRequestBodySchema {
+  type?: string;
+  format?: string;
+  properties?: Record<string, OpenAPIRequestBodySchema>;
+  required?: string[];
+  items?: OpenAPIRequestBodySchema;
+  enum?: unknown[];
+  default?: unknown;
+}
+
+interface OpenAPIRequestBody {
+  description?: string;
+  required?: boolean;
+  content: {
+    "application/json": {
+      schema: OpenAPIRequestBodySchema;
+      example: unknown;
+    };
+  };
 }
 
 interface OpenAPIResponseSchema {
@@ -218,6 +239,50 @@ export class OpenAPIHandler {
     };
   }
 
+  requestBody(
+    path: string,
+    method: HTTPMethod,
+    schema: z.ZodObject,
+    description?: string,
+    required?: boolean,
+  ) {
+    this.openAPIObject.paths[path] ??= {};
+    this.openAPIObject.paths[path][method] ??= {};
+
+    const exampleExtractor = (field: any): unknown => {
+      if (field instanceof z.ZodArray) {
+        return [exampleExtractor(field.element)];
+      }
+
+      if (field instanceof z.ZodObject) {
+        return Object.fromEntries(
+          Object.entries(field.shape).map(([key, value]) => [
+            key,
+            exampleExtractor(value),
+          ]),
+        );
+      }
+
+      return field.meta()?.example;
+    };
+
+    const JSONSchema = z.toJSONSchema(schema, {
+      target: "openapi-3.0",
+    }) as OpenAPIRequestBodySchema;
+
+    const example = exampleExtractor(schema);
+
+    this.openAPIObject.paths[path][method].requestBody = {
+      ...(description && { description }),
+      ...(required !== undefined && { required }),
+      content: {
+        "application/json": {
+          schema: JSONSchema,
+          example,
+        },
+      },
+    };
+  }
   export() {
     return JSON.stringify(this.openAPIObject, null, 2);
   }
