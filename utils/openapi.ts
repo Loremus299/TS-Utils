@@ -10,6 +10,20 @@ interface OpenAPI {
   };
 
   paths: OpenAPIPath;
+  components: OpenAPIComponent;
+}
+
+interface OpenAPIModel {
+  type?: string;
+  format?: string;
+  properties?: Record<string, OpenAPIModel>;
+  required?: string[];
+  items?: OpenAPIModel;
+  enum?: unknown[];
+}
+
+interface OpenAPIComponent {
+  [name: string]: OpenAPIModel;
 }
 
 type HTTPMethod =
