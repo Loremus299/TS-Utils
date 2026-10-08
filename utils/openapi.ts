@@ -5,25 +5,11 @@ interface OpenAPI {
 
   info: {
     title: string;
-    description: string;
     version: string;
+    description?: string;
   };
 
   paths: OpenAPIPath;
-  components: OpenAPIComponent;
-}
-
-interface OpenAPIModel {
-  type?: string;
-  format?: string;
-  properties?: Record<string, OpenAPIModel>;
-  required?: string[];
-  items?: OpenAPIModel;
-  enum?: unknown[];
-}
-
-interface OpenAPIComponent {
-  [name: string]: OpenAPIModel;
 }
 
 type HTTPMethod =
@@ -45,7 +31,7 @@ interface OpenAPIPath {
 
       parameters?: OpenAPIParameter[];
       requestBody?: {};
-      responses: {};
+      responses: OpenAPIResponse;
     };
   };
 }
@@ -60,6 +46,27 @@ interface OpenAPIParameter {
     format?: string;
   };
   example?: unknown;
+}
+
+interface OpenAPIResponseSchema {
+  type?: string;
+  format?: string;
+  properties?: Record<string, OpenAPIResponseSchema>;
+  required?: string[];
+  items?: OpenAPIResponseSchema;
+  enum?: unknown[];
+}
+
+interface OpenAPIResponse {
+  [status: string]: {
+    description: string;
+    content: {
+      "application/json": {
+        schema: OpenAPIResponseSchema;
+        example: Record<string, unknown>;
+      };
+    };
+  };
 }
 
 class OpenAPIPathHandler {
@@ -120,5 +127,50 @@ class OpenAPIPathHandler {
         example: schema.meta()?.example,
       });
     }
+  }
+
+  response(status: string, description: string, schema: z.ZodObject) {
+    const jsonSchema = z.toJSONSchema(schema);
+
+    const example = Object.fromEntries(
+      Object.entries(schema.shape).map(([key, field]) => [
+        key,
+        field.meta()?.example,
+      ]),
+    );
+
+    this.operation.responses[status] = {
+      description,
+      content: {
+        "application/json": {
+          schema: jsonSchema as OpenAPIResponseSchema,
+          example,
+        },
+      },
+    };
+  }
+}
+
+export class OpenAPIHandler {
+  openAPIObject: OpenAPI;
+
+  constructor(
+    openapi: string,
+    {
+      title,
+      description,
+      version,
+    }: { title: string; description: string; version: string },
+  ) {
+    this.openAPIObject = {
+      openapi,
+      info: {
+        title,
+        version,
+        ...(description && { description }),
+      },
+
+      paths: {},
+    };
   }
 }
