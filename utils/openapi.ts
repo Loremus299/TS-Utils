@@ -107,7 +107,7 @@ export class OpenAPIHandler {
   queryParameters(path: string, method: HTTPMethod, schema: z.ZodObject) {
     const shape = schema.shape;
 
-    const jsonSchema = z.toJSONSchema(schema) as {
+    const jsonSchema = z.toJSONSchema(schema, { target: "openapi-3.0" }) as {
       properties: Record<
         string,
         {
@@ -146,7 +146,7 @@ export class OpenAPIHandler {
   pathParameters(path: string, method: HTTPMethod, schema: z.ZodObject) {
     const shape = schema.shape;
 
-    const jsonSchema = z.toJSONSchema(schema) as {
+    const jsonSchema = z.toJSONSchema(schema, { target: "openapi-3.0" }) as {
       properties: Record<
         string,
         {
@@ -207,7 +207,9 @@ export class OpenAPIHandler {
       return field.meta()?.example;
     };
 
-    const JSONSchema = z.toJSONSchema(schema) as OpenAPIResponseSchema;
+    const JSONSchema = z.toJSONSchema(schema, {
+      target: "openapi-3.0",
+    }) as OpenAPIResponseSchema;
     const example = exampleExtractor(schema);
 
     this.openAPIObject.paths[path][method].responses[status] = {
